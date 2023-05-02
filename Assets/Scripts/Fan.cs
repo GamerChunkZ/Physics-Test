@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Fan : MonoBehaviour
@@ -7,11 +5,8 @@ public class Fan : MonoBehaviour
     [SerializeField] float maxForce = 20F;
     [SerializeField] float range = 2;
 
-    [SerializeField] float sencitivity = 2;
     [SerializeField] float fanSpeed = 3F;
     [SerializeField] Animator animator;
-
-    [SerializeField] LayerMask layerMask;
 
     Transform myTransform;
 
@@ -28,26 +23,29 @@ public class Fan : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        // increasing force overtime to a max of 1
         if (force < 1)
         {
-            force += Time.deltaTime / sencitivity;
+            force += Time.deltaTime;
             force = Mathf.Clamp01(force);
         }
 
+        // increase fanspeed as force increase
         animator.SetFloat("Speed", force * fanSpeed);
 
+        // If the baloon is in range apply force
         if (baloon)
         {
             Vector2 pos = myTransform.position;
             Vector2 direction = baloon.position - pos;
             float distance = direction.magnitude;
-
             float magnitude = Mathf.Clamp01(distance / range);
-            direction.Normalize();
 
+            direction.Normalize();
             baloon.AddForce(direction * force * maxForce * magnitude);
         }
 
+        // Click detection
         if (Input.GetKey(KeyCode.Mouse0))
         {
             if (!isHeld)
@@ -59,6 +57,7 @@ public class Fan : MonoBehaviour
         }
         else isHeld = false;
 
+        // if held move with the mouse
         if (isHeld)
         {
             Vector2 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -82,6 +81,7 @@ public class Fan : MonoBehaviour
         }
     }
 
+    // killing baloon if it collide with the fan
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Baloon") Destroy(collision.gameObject);        
